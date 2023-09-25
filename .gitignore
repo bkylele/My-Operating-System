@@ -1,4 +1,4 @@
-kernel.o
-loader.o
+# compiled object files
+*.o
 mykernel.bin
 mykernel.iso
