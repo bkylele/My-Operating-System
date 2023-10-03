@@ -1,6 +1,7 @@
-.set ALIGN,     1<<0 
-.set MEMINFO,   1<<1
-.set FLAGS,     ALIGN | MEMINFO
+.set ALIGN,         1<<0 
+.set MEMINFO,       1<<1
+.set VIDEO,         1<<2
+.set FLAGS,     ALIGN | MEMINFO | VIDEO
 .set MAGIC,     0x1badb002
 .set CHECKSUM,  -(MAGIC + FLAGS)
 
@@ -18,13 +19,13 @@
 .long   0   # Linear graphics
 .long   0   # Preferred width
 .long   0   # Preferred height
-.long   0   # Preferred pixel depth
+.long   32   # Preferred pixel depth
 
 
 .section .bss
 .align 16
 stack_bot:
-.space 2*1024*1024
+.skip 16*1024 # 16 Kib
 stack_top:
 
 
@@ -33,7 +34,14 @@ stack_top:
 .type _start, @function
 
 _start:
+    # Initialize stack pointer
     mov $stack_top, %esp
+
+    # Pushing pointer to multiboot information structure
+    pushl %ebx
+    # Pushing magic value
+    pushl %eax
+
     call kernel_main
 
     cli

@@ -1,4 +1,5 @@
 # compiled object files
 *.o
-mykernel.bin
-mykernel.iso
+*.bin
+*.iso
+*.psf

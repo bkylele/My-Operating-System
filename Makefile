@@ -1,8 +1,14 @@
-GPPPARAMS = -m32 -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore
+GPPPARAMS = -m32 -nostdlib -fno-stack-protector -fno-builtin -fno-exceptions -fno-leading-underscore -I.
 ASPARAMS = --32
 LDPARAMS = -melf_i386
 
-objects = boot.o kernel.o
+SRCS := $(wildcard *.c */*.c */*/*.c */*/*/*.c)
+OBJS := $(patsubst %.c,%.o,$(SRCS))
+
+ASMSRCS := $(wildcard *.s */*.s */*/*.s */*/*/*.s)
+ASMOBJS := $(patsubst %.s,%.o,$(ASMSRCS))
+
+# objects = boot.o kernel.o
 
 %.o: %.c
 	gcc $(GPPPARAMS) -o $@ -c $<
@@ -10,8 +16,8 @@ objects = boot.o kernel.o
 %.o: %.s
 	as $(ASPARAMS) -o $@ $<
 
-myos.bin:  linker.ld $(objects)
-	ld $(LDPARAMS) -T $< -o $@ $(objects)
+myos.bin:  linker.ld $(OBJS) $(ASMOBJS)
+	ld $(LDPARAMS) -T $< -o $@ $(OBJS) $(ASMOBJS)
 
 install: myos.bin
 	sudo cp $< /boot/myos.bin
@@ -34,3 +40,6 @@ myos.iso: myos.bin
 run: myos.iso
 	(killall VirtualBox && sleep 1) || true
 	virtualboxvm --startvm "My Operating System" &
+
+clean:
+	rm -f myos.bin $(OBJS) $(ASMOBJS) myos.bin
