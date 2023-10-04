@@ -17,7 +17,7 @@ ASMOBJS := $(patsubst %.s,%.o,$(ASMSRCS))
 	as $(ASPARAMS) -o $@ $<
 
 myos.bin:  linker.ld $(OBJS) $(ASMOBJS)
-	ld $(LDPARAMS) -T $< -o $@ $(OBJS) $(ASMOBJS)
+	ld $(LDPARAMS) -T $< -o $@ $(OBJS) $(ASMOBJS) font.o
 
 install: myos.bin
 	sudo cp $< /boot/myos.bin
