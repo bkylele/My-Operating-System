@@ -1,19 +1,18 @@
 # MinimalOS
----------------------
 An exploratory project on implementing a 32-bit operating system.
 
-# Requirements
+## Requirements
 Requires i386-elf-binutils for compilation (gcc, make). Requires
 VirtualBox, grub-legacy, and xorriso for virtualization.
 
-# Roadmap
+## Roadmap
 
 - [x] Basic printing
 - [x] Drawing in the linear framebuffer
 - [ ] Global Descriptor Table
 - [ ] Interrupt Descriptor Table
 
-# Building
+## Building
 
 ``` bash
 $ make run clean # this will run VirtualBox
