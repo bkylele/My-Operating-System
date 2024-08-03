@@ -34,46 +34,52 @@ void vga_init(const multiboot_info_t *mbi) {
     fb_b_position       = mbi->framebuffer_blue_field_position;
     fb_b_size           = mbi->framebuffer_blue_mask_size;
 
-    set_color(255, 255, 255); // default color white
+    // set_color(255, 255, 255); // default color white
 }
 
 
-void set_color(uint8_t r, uint8_t g, uint8_t b) {
-    // for now, assuming 24-bit rgb info
+// void set_color(uint8_t r, uint8_t g, uint8_t b) {
+//     // for now, assuming 24-bit rgb info
+// 
+//     color |= (r << fb_r_position);
+//     color |= (g << fb_g_position);
+//     color |= (b << fb_b_position);
+// }
 
-    color |= (r << fb_r_position);
-    color |= (g << fb_g_position);
-    color |= (b << fb_b_position);
-}
 
-
-void putpixel(size_t x, size_t y) {
+void putpixel(size_t x, size_t y, uint32_t color) {
     // for now, assuming 32 bits per pixel
     uint32_t *pixel = (uint8_t *) fb_addr + (fb_pitch * y) + (fb_bits_per_pixel / 8) * x;
     *pixel = color;
 }
 
 
-void draw_diagonal_line(bool pos) {
+extern uint8_t *_binary_Lat38_VGA16_psf_start;
+
+// void draw_char(char c, size_t x, size_t y, uint32_t fg_color, uint32_t bg_color) {
+// }
+
+
+void draw_diagonal_line(bool pos, uint32_t color) {
     if (pos) {
         for (int i = 0; i < (int)fb_width && i < (int)fb_height; i++) {
-            putpixel(i, i);
+            putpixel(i, i, color);
         }
     } else {
         for (int i = 0; i < (int)fb_width && i < (int)fb_height; i++) {
-            putpixel(-i, i);
+            putpixel(-i, i, color);
         }
     }
 }
 
-void draw_horizontal_line(size_t y) {
+void draw_horizontal_line(size_t y, uint32_t color) {
     for (int i = 0; i < (int)fb_width; ++i) {
-        putpixel(i, y);
+        putpixel(i, y, color);
     }
 }
 
-void draw_vertical_line(size_t x) {
+void draw_vertical_line(size_t x, uint32_t color) {
     for (int i = 0; i < (int)fb_height; ++i) {
-        putpixel(x, i);
+        putpixel(x, i, color);
     }
 }
