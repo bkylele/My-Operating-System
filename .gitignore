@@ -4,4 +4,5 @@
 *.iso
 *.psf
 
-README.org
+.cache/
+compile_commands.json
