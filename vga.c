@@ -1,4 +1,5 @@
 #include <vga.h>
+#include <font.h>
 
 uint32_t fb_addr;
 uint32_t fb_pitch;
@@ -49,37 +50,58 @@ void vga_init(const multiboot_info_t *mbi) {
 
 void putpixel(size_t x, size_t y, uint32_t color) {
     // for now, assuming 32 bits per pixel
-    uint32_t *pixel = (uint8_t *) fb_addr + (fb_pitch * y) + (fb_bits_per_pixel / 8) * x;
+    uint32_t *pixel = (uint32_t *) ((uint8_t *) fb_addr + (fb_pitch * y) + (fb_bits_per_pixel / 8) * x);
     *pixel = color;
 }
 
 
-extern uint8_t *_binary_Lat38_VGA16_psf_start;
+// why is this a char???
+extern char _binary_lat9_16_psf_start;
 
-// void draw_char(char c, size_t x, size_t y, uint32_t fg_color, uint32_t bg_color) {
-// }
+void draw_char(unsigned char c, size_t cx, size_t cy, uint32_t fgcolor, uint32_t bgcolor) {
+    PSF_font *font = (PSF_font *) &_binary_lat9_16_psf_start;
+
+    unsigned char* glyph = (uint8_t*) font + font->headersize
+        + (c>0 && c<font->numglyph ? c : 0) * font->bytesperglyph;
+
+    size_t offx = cx * font->width;
+    size_t offy = cy * font->height;
+
+    unsigned char x, y, mask;
+    for (y = 0; y < font->height; ++y) {
+        mask = 1 << (font->width - 1); // left-side of the line, little-endian
+
+        for (x = 0; x < font->width; ++x) {
+            putpixel(offx + x, offy + y, *glyph & mask ? fgcolor : bgcolor);
+            mask >>= 1;
+        }
+
+        ++glyph;
+    }
+    
+}
 
 
 void draw_diagonal_line(bool pos, uint32_t color) {
     if (pos) {
-        for (int i = 0; i < (int)fb_width && i < (int)fb_height; i++) {
+        for (int i = 0; i < fb_width && i < fb_height; i++) {
             putpixel(i, i, color);
         }
     } else {
-        for (int i = 0; i < (int)fb_width && i < (int)fb_height; i++) {
+        for (int i = 0; i < fb_width && i < fb_height; i++) {
             putpixel(-i, i, color);
         }
     }
 }
 
 void draw_horizontal_line(size_t y, uint32_t color) {
-    for (int i = 0; i < (int)fb_width; ++i) {
+    for (int i = 0; i < fb_width; ++i) {
         putpixel(i, y, color);
     }
 }
 
 void draw_vertical_line(size_t x, uint32_t color) {
-    for (int i = 0; i < (int)fb_height; ++i) {
+    for (int i = 0; i < fb_height; ++i) {
         putpixel(x, i, color);
     }
 }
