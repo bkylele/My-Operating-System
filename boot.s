@@ -83,6 +83,21 @@ _start:
 	jmp 1b
 
 
+.global gdt_flush
+.extern gdt_p
+gdt_flush:
+    lgdt [gdt_p]        // Load the GDT with our '_gp' which is a special pointer
+    mov %ax, 0x10      // 0x10 is the offset in the GDT to our data segment
+    mov %ds, %ax
+    mov %es, %ax
+    mov %fs, %ax
+    mov %gs, %ax
+    mov %ss, %ax
+    ljmp $0x8, $flush2   // 0x08 is the offset to our code segment: Far jump!
+flush2:
+    ret               // Returns back to the C code!
+
+
 /*
 Set the size of the _start symbol to the current location '.' minus its start.
 This is useful when debugging or when you implement call tracing.
