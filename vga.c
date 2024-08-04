@@ -34,24 +34,22 @@ void vga_init(const multiboot_info_t *mbi) {
     fb_g_size           = mbi->framebuffer_green_mask_size;
     fb_b_position       = mbi->framebuffer_blue_field_position;
     fb_b_size           = mbi->framebuffer_blue_mask_size;
-
-    // set_color(255, 255, 255); // default color white
 }
 
 
-// void set_color(uint8_t r, uint8_t g, uint8_t b) {
-//     // for now, assuming 24-bit rgb info
-// 
-//     color |= (r << fb_r_position);
-//     color |= (g << fb_g_position);
-//     color |= (b << fb_b_position);
-// }
-
-
-void putpixel(size_t x, size_t y, uint32_t color) {
+uint32_t *pixel_at(size_t x, size_t y) {
     // for now, assuming 32 bits per pixel
-    uint32_t *pixel = (uint32_t *) ((uint8_t *) fb_addr + (fb_pitch * y) + (fb_bits_per_pixel / 8) * x);
-    *pixel = color;
+    return (uint32_t *) ((uint8_t *) fb_addr + (fb_pitch * y) + (fb_bits_per_pixel / 8) * x);
+}
+
+
+void put_pixel(size_t x, size_t y, uint32_t color) {
+    *pixel_at(x,y) = color;
+}
+
+
+void move_pixel(size_t x, size_t y, size_t new_x, size_t new_y) {
+    *pixel_at(new_x, new_y) = *pixel_at(x,y);
 }
 
 
@@ -72,7 +70,7 @@ void draw_char(unsigned char c, size_t cx, size_t cy, uint32_t fgcolor, uint32_t
         mask = 1 << (font->width - 1); // left-side of the line, little-endian
 
         for (x = 0; x < font->width; ++x) {
-            putpixel(offx + x, offy + y, *glyph & mask ? fgcolor : bgcolor);
+            put_pixel(offx + x, offy + y, *glyph & mask ? fgcolor : bgcolor);
             mask >>= 1;
         }
 
@@ -82,26 +80,43 @@ void draw_char(unsigned char c, size_t cx, size_t cy, uint32_t fgcolor, uint32_t
 }
 
 
+void move_char(size_t cx, size_t cy, int dcx, int dcy) {
+    PSF_font *font = (PSF_font *) &_binary_lat9_16_psf_start;
+
+    size_t offx = cx * font->width;
+    size_t offy = cy * font->height;
+    size_t new_offx = (cx + dcx) * font->width;
+    size_t new_offy = (cy + dcy) * font->height;
+
+    int x, y;
+    for (y = 0; y < font->height; ++y) {
+        for (x = 0; x < font->width; ++x) {
+            move_pixel(offx+x, offy+y, new_offx+x, new_offy+y);
+        }
+    }
+}
+
+
 void draw_diagonal_line(bool pos, uint32_t color) {
     if (pos) {
         for (int i = 0; i < fb_width && i < fb_height; i++) {
-            putpixel(i, i, color);
+            put_pixel(i, i, color);
         }
     } else {
         for (int i = 0; i < fb_width && i < fb_height; i++) {
-            putpixel(-i, i, color);
+            put_pixel(-i, i, color);
         }
     }
 }
 
 void draw_horizontal_line(size_t y, uint32_t color) {
     for (int i = 0; i < fb_width; ++i) {
-        putpixel(i, y, color);
+        put_pixel(i, y, color);
     }
 }
 
 void draw_vertical_line(size_t x, uint32_t color) {
     for (int i = 0; i < fb_height; ++i) {
-        putpixel(x, i, color);
+        put_pixel(x, i, color);
     }
 }

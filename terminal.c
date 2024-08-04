@@ -1,10 +1,10 @@
-#include <stdint.h>
-#include <vga.h>
+#include "multiboot.h"
 #include <terminal.h>
+#include <vga.h>
 
 
 const size_t VGA_WIDTH = 80;
-const size_t VGA_HEIGHT = 25;
+const size_t VGA_HEIGHT = 24;
 
 size_t terminal_column;
 size_t terminal_row;
@@ -19,6 +19,8 @@ void terminal_init(multiboot_info_t *mbi) {
     terminal_row = 0;
     terminal_fg_color = (color_info_t){ {255, 255, 255} };
     terminal_bg_color = (color_info_t){ {0, 0, 0} };        
+
+    terminal_clear();
 }
 
 
@@ -29,7 +31,11 @@ void terminal_putchar(char c) {
 
     if (++terminal_column > VGA_WIDTH) {
         terminal_column = 0;
-        ++terminal_row;
+        if (++terminal_row == VGA_HEIGHT) {
+            terminal_scroll();
+            terminal_clear_row(VGA_HEIGHT-1);
+            --terminal_row;
+        }
     }
 }
 
@@ -40,3 +46,28 @@ void terminal_write(const char* data, size_t n) {
     }
 }
 
+
+void terminal_clear() {
+    int i;
+    for (i = 0; i < VGA_HEIGHT; ++i) {
+        terminal_clear_row(i);
+    }
+}
+
+
+void terminal_clear_row(size_t y) {
+    int i;
+    for (i = 0; i < VGA_WIDTH; ++i) {
+        draw_char(' ', i, y, terminal_fg_color.data, terminal_bg_color.data);
+    }
+}
+
+
+void terminal_scroll() {
+    int i, j;
+    for (i = 1; i < VGA_HEIGHT; ++i) {
+        for (j = 0; j < VGA_WIDTH; ++j) {
+            move_char(j, i, 0, -1);
+        }
+    }
+}
