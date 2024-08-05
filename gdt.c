@@ -1,5 +1,6 @@
 
 #include <gdt.h>
+#include <terminal.h>
 
 enum {
     SEG_NULL,
@@ -33,23 +34,28 @@ void gdt_set_gate(gdt_entry_t *entry, uint32_t base, uint32_t limit, uint8_t acc
 
 
 void gdt_init() {
-    _gdt_ptr.limit = sizeof(gdt_entries) - 1;
-    _gdt_ptr.base = (uint32_t) &gdt_entries;
+    terminal_writestring("Initializing Global Descriptor Table...\n");
 
+    terminal_writestring("Setting NULL segment...\n");
     // NULL segment
     gdt_set_gate(&gdt_entries[SEG_NULL], 0, 0, 0, 0);
 
+    terminal_writestring("Setting Kernel segments...\n");
     // Kernel segments
     gdt_set_gate(&gdt_entries[SEG_KERNEL_CODE], 0, 0xFFFFF, 0x9A, 0xC);
     gdt_set_gate(&gdt_entries[SEG_KERNEL_DATA], 0, 0xFFFFF, 0x92, 0xC);
 
+    terminal_writestring("Setting User segments...\n");
     // User segments
     gdt_set_gate(&gdt_entries[SEG_USER_CODE], 0, 0xFFFFF, 0xFA, 0xC);
     gdt_set_gate(&gdt_entries[SEG_USER_DATA], 0, 0xFFFFF, 0xF2, 0xC);
 
+    terminal_writestring("Setting Task state segment...\n");
     // Task state segment
     gdt_set_gate(&gdt_entries[SEG_TASK_STATE], 0, 0, 0, 0);
 
+    _gdt_ptr.limit = sizeof(gdt_entries) - 1;
+    _gdt_ptr.base = (uint32_t) &gdt_entries;
     _gdt_flush();
 }
 

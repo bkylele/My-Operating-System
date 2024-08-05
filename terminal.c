@@ -25,17 +25,31 @@ void terminal_init(multiboot_info_t *mbi) {
 
 
 void terminal_putchar(char c) {
-    draw_char(c, terminal_column, terminal_row,
-            terminal_fg_color.data,
-            terminal_bg_color.data);
-
-    if (++terminal_column > VGA_WIDTH) {
+    if (c == '\n') {
         terminal_column = 0;
-        if (++terminal_row == VGA_HEIGHT) {
-            terminal_scroll();
-            terminal_clear_row(VGA_HEIGHT-1);
-            --terminal_row;
-        }
+        ++terminal_row;
+    } else {
+        draw_char(c, terminal_column++, terminal_row,
+                terminal_fg_color.data,
+                terminal_bg_color.data);
+    }
+
+    if (terminal_column > VGA_WIDTH) {
+        terminal_column = 0;
+        ++terminal_row;
+    }
+
+    if (terminal_row == VGA_HEIGHT) {
+        terminal_scroll();
+        terminal_clear_row(VGA_HEIGHT-1);
+        --terminal_row;
+    }
+}
+
+
+void terminal_writestring(const char* data) {
+    for (; *data; ++data) {
+        terminal_putchar(*data);
     }
 }
 
@@ -43,6 +57,27 @@ void terminal_putchar(char c) {
 void terminal_write(const char* data, size_t n) {
     for (size_t i = 0; i < n; ++i) {
         terminal_putchar(data[i]);
+    }
+}
+
+
+void terminal_writedecimal(size_t num) {
+    if (num == 0) {
+        terminal_putchar(1+'0');
+        return;
+    }
+
+    int i = 0;
+    char buf[16];
+
+    while (num) {
+        buf[i++] = (num % 10) + '0';
+        num /= 10;
+    }
+
+    --i;
+    while (i >= 0) {
+        terminal_putchar(buf[i--]);
     }
 }
 

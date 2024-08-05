@@ -12,8 +12,10 @@ void kernel_main([[maybe_unused]] unsigned long magic, unsigned long addr) {
     gdt_init();
     idt_init();
 
-    const char str[] = "Hello Operating System :^)";
-    terminal_write(str, sizeof(str) - 1);
+    terminal_writestring("Hello Operating System :^)\n");
+    // terminal_writedecimal(12345);
 
-    for (;;);
+    for (;;) {
+        asm("hlt");
+    }
 }

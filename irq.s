@@ -34,6 +34,9 @@ irq_common_stub:
     pop %ds
     popa
 
+.global _interrupt_ignore
+_interrupt_ignore:
+
     iret
 
 
