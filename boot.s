@@ -83,10 +83,10 @@ _start:
 	jmp 1b
 
 
-.global gdt_flush
-.extern gdt_p
-gdt_flush:
-    lgdt [gdt_p]        // Load the GDT with our '_gp' which is a special pointer
+.global _gdt_flush
+.extern _gdt_ptr
+_gdt_flush:
+    lgdt [_gdt_ptr]        // Load the GDT with our '_gp' which is a special pointer
     mov %ax, 0x10      // 0x10 is the offset in the GDT to our data segment
     mov %ds, %ax
     mov %es, %ax
@@ -96,6 +96,15 @@ gdt_flush:
     ljmp $0x8, $flush2   // 0x08 is the offset to our code segment: Far jump!
 flush2:
     ret               // Returns back to the C code!
+
+
+.global _idt_flush
+.extern _idtr_ptr
+_idt_flush:
+    lidt [_idtr_ptr]
+    sti
+    ret 
+
 
 
 /*

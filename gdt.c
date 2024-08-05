@@ -9,12 +9,12 @@ enum {
     SEG_USER_DATA,
     SEG_TASK_STATE,
 };
-struct segment_descriptor gdt_entries[6];
-struct gdt_ptr gdt_p;
+gdt_entry_t gdt_entries[6];
+gdt_ptr_t _gdt_ptr;
 
-extern void gdt_flush();
+extern void _gdt_flush();
 
-void gdt_set_gate(struct segment_descriptor *entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags) {
+void gdt_set_gate(gdt_entry_t *entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags) {
     // Setup base
     entry->base_lo  = base & 0xFFFF;
     entry->base_mid = (base >> 16) & 0xFF;
@@ -33,8 +33,8 @@ void gdt_set_gate(struct segment_descriptor *entry, uint32_t base, uint32_t limi
 
 
 void gdt_init() {
-    gdt_p.limit = sizeof(gdt_entries) - 1;
-    gdt_p.base = (uint32_t) &gdt_entries;
+    _gdt_ptr.limit = sizeof(gdt_entries) - 1;
+    _gdt_ptr.base = (uint32_t) &gdt_entries;
 
     // NULL segment
     gdt_set_gate(&gdt_entries[SEG_NULL], 0, 0, 0, 0);
@@ -50,6 +50,6 @@ void gdt_init() {
     // Task state segment
     gdt_set_gate(&gdt_entries[SEG_TASK_STATE], 0, 0, 0, 0);
 
-    gdt_flush();
+    _gdt_flush();
 }
 
