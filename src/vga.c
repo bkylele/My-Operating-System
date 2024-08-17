@@ -54,10 +54,10 @@ void move_pixel(size_t x, size_t y, size_t new_x, size_t new_y) {
 
 
 // why is this a char???
-extern char _binary_lat9_16_psf_start;
+extern char _binary_src_fonts_lat9_16_psf_start[];
 
 void draw_char(unsigned char c, size_t cx, size_t cy, uint32_t fgcolor, uint32_t bgcolor) {
-    PSF_font *font = (PSF_font *) &_binary_lat9_16_psf_start;
+    PSF_font *font = (PSF_font *) &_binary_src_fonts_lat9_16_psf_start;
 
     unsigned char* glyph = (uint8_t*) font + font->headersize
         + (c>0 && c<font->numglyph ? c : 0) * font->bytesperglyph;
@@ -81,7 +81,7 @@ void draw_char(unsigned char c, size_t cx, size_t cy, uint32_t fgcolor, uint32_t
 
 
 void move_char(size_t cx, size_t cy, int dcx, int dcy) {
-    PSF_font *font = (PSF_font *) &_binary_lat9_16_psf_start;
+    PSF_font *font = (PSF_font *) &_binary_src_fonts_lat9_16_psf_start;
 
     size_t offx = cx * font->width;
     size_t offy = cy * font->height;

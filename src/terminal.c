@@ -1,4 +1,3 @@
-#include "multiboot.h"
 #include <terminal.h>
 #include <vga.h>
 

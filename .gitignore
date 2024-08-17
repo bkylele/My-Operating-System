@@ -2,7 +2,8 @@
 *.o
 *.bin
 *.iso
-*.psf
 
+bin/
+build/
 .cache/
 compile_commands.json

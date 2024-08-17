@@ -1,54 +1,57 @@
 AS = ~/opt/cross/bin/i686-elf-as
 CC = ~/opt/cross/bin/i686-elf-gcc
 
-CCPARAMS = -I. -ffreestanding -O2 -Wall
-ASPARAMS = --32
-LDPARAMS = -melf_i386
-
-SRCS := $(wildcard *.c)
-ASMSRCS := $(wildcard *.s)
-FONTSRCS := $(wildcard *.psf)
-
-OBJS := $(patsubst %.c, build/%.o, $(SRCS)) $(patsubst %.s, build/%.o, $(ASMSRCS)) $(patsubst %.psf, build/%.o, $(FONTSRCS))
+CCFLAGS = -I. -Iinclude -ffreestanding -O2 -Wall
+ASFLAGS = --32
+LDFLAGS = -melf_i386
 
 BUILDDIR := build
 BINDIR := bin
 
-default: $(BINDIR)/myos.bin
+CSRCS := 	$(shell find src/ -name *.c)
+ASMSRCS := 	$(shell find src/ -name *.s)
+FONTS := 	$(shell find src/ -name *.psf)
 
-$(BUILDDIR)/%.o: %.c
-	$(CC) $(CCPARAMS) $< -o $@ -c
+DEP :=		$(CSRCS:src/%.c=build/%.d)
+OBJS := 	$(CSRCS:src/%.c=build/%.o) $(ASMSRCS:src/%.s=build/%.o) $(FONTS:src/%.psf=build/%.o)
 
-$(BUILDDIR)/%.o: %.s
-	$(AS) $< -o $@
 
-$(BUILDDIR)/%.o: %.psf
-	objcopy -O elf32-i386 -B i386 -I binary $< $@
+myos.bin: linker.ld $(OBJS)
+	@mkdir -p $(BINDIR)
+	ld $(LDFLAGS) -T $< -o bin/$@ $(OBJS)
 
-$(BINDIR)/myos.bin: linker.ld setup $(OBJS)
-	ld $(LDPARAMS) -T $< -o $@ $(OBJS)
-
-# install: myos.bin
-# 	sudo cp $< /boot/myos.bin
-
-$(BINDIR)/myos.iso: $(BINDIR)/myos.bin
+myos.iso: myos.bin
 	mkdir -p iso/boot/grub
-	cp $< iso/boot/
+	cp $(BINDIR)/$< iso/boot/
 	echo 'menuentry "myos" {' >> iso/boot/grub/grub.cfg
 	echo '	multiboot /boot/myos.bin' >> iso/boot/grub/grub.cfg
 	echo '}' >> iso/boot/grub/grub.cfg
-	grub-mkrescue --output=$@ iso
+	grub-mkrescue --output=$(BINDIR)/$@ iso
 	rm -rf iso
 
-run: $(BINDIR)/myos.iso
-	qemu-system-i386 -cdrom $<
 
-setup:
-	mkdir -p $(BINDIR)
-	mkdir -p $(BUILDDIR)
+
+$(BUILDDIR)/%.o: src/%.c
+	@mkdir -p $(@D)
+	$(CC) $(CCFLAGS) -MMD -MP -c $< -o $@
+
+$(BUILDDIR)/%.o: src/%.s
+	@mkdir -p $(@D)
+	$(AS) $< -o $@
+
+$(BUILDDIR)/%.o: src/%.psf
+	@mkdir -p $(@D)
+	objcopy -O elf32-i386 -B i386 -I binary $< $@
+
+-include $(DEP)
+
+
+
+qemu: myos.iso
+	qemu-system-i386 -cdrom $(BINDIR)/$<
 
 clean:
 	rm -rf $(BINDIR) $(BUILDDIR)
 
 
-.PHONY: setup clean
+.PHONY: clean, qemu

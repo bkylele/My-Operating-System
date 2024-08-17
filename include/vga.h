@@ -22,6 +22,7 @@ void move_pixel(size_t x, size_t y, size_t dx, size_t dy);
 
 void draw_char(unsigned char c, size_t cx, size_t cy, uint32_t fgcolor, uint32_t bgcolor);
 void move_char(size_t cx, size_t cy, int dcx, int dcy);
+
 void draw_diagonal_line(bool pos, uint32_t color);
 void draw_horizontal_line(size_t y, uint32_t color);
 void draw_vertical_line(size_t x, uint32_t color);

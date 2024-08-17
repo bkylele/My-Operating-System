@@ -12,10 +12,8 @@ void kernel_main([[maybe_unused]] unsigned long magic, unsigned long addr) {
     gdt_init();
     idt_init();
 
-    terminal_writestring("Hello Operating System :^)\n");
-    // terminal_writedecimal(12345);
+    terminal_writestring("Hello :^)\n");
 
-    for (;;) {
+    for (;;) 
         asm("hlt");
-    }
 }
