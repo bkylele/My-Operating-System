@@ -77,7 +77,7 @@ void idt_set_descriptor(uint8_t vec_index, void* isr, uint8_t flags) {
 uint32_t _irq_handler(uint8_t interrupt_num, uint32_t esp) {
     if (interrupt_num == 0x21) {
         unsigned char in = inb(0x60);
-        terminal_writedecimal(in);
+        terminal_writedec(in);
         terminal_writestring(" ");
     }
     outb(0x20, 0x20);

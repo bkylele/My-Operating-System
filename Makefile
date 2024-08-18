@@ -1,20 +1,27 @@
 AS = ~/opt/cross/bin/i686-elf-as
 CC = ~/opt/cross/bin/i686-elf-gcc
 
-CCFLAGS = -I. -Iinclude -ffreestanding -O2 -Wall
+CCFLAGS = -I. -Iinclude -Ilibc/include -ffreestanding -O2 -Wall -libc
 ASFLAGS = --32
 LDFLAGS = -melf_i386
 
 BUILDDIR := build
 BINDIR := bin
 
-CSRCS := 	$(shell find src/ -name *.c)
-ASMSRCS := 	$(shell find src/ -name *.s)
-FONTS := 	$(shell find src/ -name *.psf)
+CSRCS := $(shell find src/ -name *.c)
+ASMSRCS := $(shell find src/ -name *.s)
+FONTS := $(shell find src/ -name *.psf)
 
-DEP :=		$(CSRCS:src/%.c=build/%.d)
-OBJS := 	$(CSRCS:src/%.c=build/%.o) $(ASMSRCS:src/%.s=build/%.o) $(FONTS:src/%.psf=build/%.o)
+LIBC := $(shell find libc/src/ -name *.c)
+LIBCDEP := $(LIBC:libc/src/%.c=build%.d)
 
+DEP := $(CSRCS:src/%.c=build/%.d) $(LIBCDEP)
+OBJS := $(CSRCS:src/%.c=build/%.o) $(ASMSRCS:src/%.s=build/%.o) \
+	$(FONTS:src/%.psf=build/%.o) $(LIBC:libc/src/%.c=build/%.o)
+
+
+# test:
+# 	@echo $(LIBC)
 
 myos.bin: linker.ld $(OBJS)
 	@mkdir -p $(BINDIR)
@@ -42,6 +49,11 @@ $(BUILDDIR)/%.o: src/%.s
 $(BUILDDIR)/%.o: src/%.psf
 	@mkdir -p $(@D)
 	objcopy -O elf32-i386 -B i386 -I binary $< $@
+
+$(BUILDDIR)/%.o: libc/src/%.c
+	@mkdir -p $(@D)
+	$(CC) $(CCFLAGS) -MMD -MP -c $< -o $@
+
 
 -include $(DEP)
 

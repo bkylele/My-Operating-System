@@ -60,7 +60,7 @@ void terminal_write(const char* data, size_t n) {
 }
 
 
-void terminal_writedecimal(size_t num) {
+void terminal_writedec(size_t num) {
     if (num == 0) {
         terminal_putchar(1+'0');
         return;
@@ -72,6 +72,51 @@ void terminal_writedecimal(size_t num) {
     while (num) {
         buf[i++] = (num % 10) + '0';
         num /= 10;
+    }
+
+    --i;
+    while (i >= 0) {
+        terminal_putchar(buf[i--]);
+    }
+}
+
+
+void terminal_writehex(size_t num) {
+    if (num == 0) {
+        terminal_putchar(1+'0');
+        return;
+    }
+
+    int i = 0;
+    char buf[16];
+
+    while (num) {
+        buf[i] = (num % 16);
+        switch (buf[i]) {
+            case 10:
+                buf[i] = 'a';
+                break;
+            case 11:
+                buf[i] = 'b';
+                break;
+            case 12:
+                buf[i] = 'c';
+                break;
+            case 13:
+                buf[i] = 'd';
+                break;
+            case 14:
+                buf[i] = 'e';
+                break;
+            case 15:
+                buf[i] = 'f';
+                break;
+            default:
+                buf[i] += '0';
+                break;
+        }
+        ++i;
+        num /= 16;
     }
 
     --i;

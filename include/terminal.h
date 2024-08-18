@@ -9,7 +9,8 @@ void terminal_putchar(char c);
 void terminal_write(const char* data, size_t size);
 void terminal_writestring(const char* data);
 
-void terminal_writedecimal(size_t num);
+void terminal_writedec(size_t num);
+void terminal_writehex(size_t num);
 
 void terminal_clear();
 void terminal_clear_row(size_t y);
