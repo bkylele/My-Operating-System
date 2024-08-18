@@ -1,26 +1,38 @@
 # MinimalOS
-An exploratory project on implementing a 32-bit operating system.
+An exploratory project implementing an operating system for Intel's 32-bit Protected Mode.
 
-## Requirements
-Requires i386-elf-binutils for compilation (gcc, make). Requires
-VirtualBox, grub-legacy, and xorriso for virtualization.
+> NOTE: This is a Toy OS, not intended for daily driving (and probably not for a while).
+
+## Build
+
+### Dependencies
+This project requires a GCC Cross-Compiler set up for i686-elf. **This will not
+work with an x86_64-elf cross compiler**. See how to build gcc on [OsDev Wiki](https://wiki.osdev.org/GCC_Cross-Compiler).
+Assuming you have GCC, GAS, and Make, you will also need:
+
+- Grub
+- xorriso
+- QEMU (Optionally for testing in VM)
+
+### To Build
+
+``` bash
+$ make myos.iso
+```
+To create the cdrom image or:
+
+``` bash
+$ make qemu
+```
+To run in a VM.
+
 
 ## Roadmap
 
-- [x] Basic printing
-- [x] Drawing in the linear framebuffer
-- [ ] Global Descriptor Table
-- [ ] Interrupt Descriptor Table
+- [X] Terminal Interface
+- [X] Global Descriptor Table
+- [X] Interrupt Descriptor Table
+- [ ] System Calls
+- [ ] Paging
+- [ ] Tasking
 
-## Building
-
-``` bash
-$ make run clean # this will run VirtualBox
-```
-To install kernel to grub bootloader, do
-
-``` bash
-$ make install
-```
-NOTE: As of now you need to manually add the menuentry in your grub
-config to install.
