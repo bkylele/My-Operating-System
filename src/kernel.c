@@ -9,12 +9,19 @@
 
 
 void kernel_main([[maybe_unused]] unsigned long magic, unsigned long addr) {
+    if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
+        return;
+    }
+
+
     multiboot_info_t *mbi = (multiboot_info_t *) addr;
+
     terminal_init(mbi);
     gdt_init();
     idt_init();
 
-    printf("Hallo %d %x %s\n", 9000, 255, ":^)");
+    printf("Hallo %u %x %s\n", 9000, 255, ":^)");
 
-    for (;;) asm("hlt");
+    for (;;)
+        asm("hlt");
 }

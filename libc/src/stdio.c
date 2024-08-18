@@ -13,14 +13,14 @@ int printf(const char* restrict format, ...) {
             ++format;
 
             switch (*format) {
-                case 'd':
+                case 'u':
                     terminal_writedec(va_arg(args, size_t));
-                    break;
-                case 's':
-                    terminal_writestring(va_arg(args, const char*));
                     break;
                 case 'x':
                     terminal_writehex(va_arg(args, size_t));
+                    break;
+                case 's':
+                    terminal_writestring(va_arg(args, const char*));
                     break;
             }
 
@@ -36,10 +36,13 @@ int printf(const char* restrict format, ...) {
 }
 
 int putchar(int c) {
-    return 0;
+    terminal_putchar(c);
+    return c;
 }
 
 int puts(const char* s) {
+    terminal_writestring(s);
+    terminal_putchar('\n');
     return 0;
 }
 
